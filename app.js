@@ -3,6 +3,8 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const cors = require('cors');
+const axios = require('axios');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -18,6 +20,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// example (modify your existing corsOptions or use inline)
+const corsOptions = {
+  origin: ['http://localhost:5173', 'http://localhost:5176', 'http://localhost:8080', 'http://localhost:8081'],
+  credentials: true
+};
+app.use(cors(corsOptions));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -39,3 +48,6 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
+axios.get('http://localhost:3000/courses', { withCredentials: true })
+  .then(r => r.json())
