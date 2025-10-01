@@ -5,18 +5,13 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
   port: dbConfig.PORT,
   dialect: dbConfig.dialect,
-<<<<<<< HEAD
   logging: false,
-=======
-  // operatorsAliases deprecated in v5+; removing to silence warning
->>>>>>> origin/integrate/lewis
   pool: {
     max: dbConfig.pool.max,
     min: dbConfig.pool.min,
     acquire: dbConfig.pool.acquire,
-    idle: dbConfig.pool.idle
-  },
-  logging: false
+    idle: dbConfig.pool.idle,
+  }
 });
 
 const db = {};
