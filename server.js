@@ -4,13 +4,16 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// CORS configuration
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:5176',
-  'http://localhost:8080',
-  'http://localhost:8081'
-];
+// CORS configuration (optionally override with CORS_ORIGINS=origin1,origin2)
+const allowedOrigins = (process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map(s => s.trim()).filter(Boolean)
+  : [
+    'http://localhost:5173',
+    'http://localhost:5176',
+    'http://localhost:8080',
+    'http://localhost:8081'
+  ]);
+console.log('Allowed CORS origins:', allowedOrigins);
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
