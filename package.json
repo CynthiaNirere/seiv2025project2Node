@@ -1,16 +1,32 @@
-{
+﻿{
   "name": "seiv2025project2node",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Courses Node.js with Rest API",
+  "main": "server.js",
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node server.js",
+    "bundle": "mkdir deploy && cp -r app server.js package.json package-lock.json .env deploy"
   },
+  "keywords": [
+    "node.js",
+    "express",
+    "sequelize",
+    "courses",
+    "rest-api"
+  ],
+  "author": "Justice League",
+  "license": "ISC",
+  "private": true,
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
-    "express": "~4.16.1",
+    "express": "^4.17.3",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
-    "pug": "2.0.0-beta11"
+    "pug": "2.0.0-beta11",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "mysql2": "^2.3.3",
+    "sequelize": "^6.19.0"
   }
 }
