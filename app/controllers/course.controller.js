@@ -47,74 +47,45 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Course with an id
+// Find a single Course by its Course_Number (primary key)
 exports.findOne = (req, res) => {
-  const id = req.params.id;
+  const courseNumber = req.params.id; // route param retained as :id for compatibility
 
-  Course.findByPk(id)
+  Course.findByPk(courseNumber)
     .then(data => {
-      if (data) {
-        res.send(data);
-      } else {
-        res.status(404).send({
-          message: `Cannot find Course with id=${id}.`
-        });
-      }
+      if (data) return res.send(data);
+      return res.status(404).send({ message: `Cannot find Course with Course_Number=${courseNumber}.` });
     })
     .catch(err => {
-      res.status(500).send({
-        message: "Error retrieving Course with id=" + id
-      });
+      res.status(500).send({ message: 'Error retrieving Course with Course_Number=' + courseNumber, detail: err.message });
     });
 };
 
-// Update a Course by the id in the request
+// Update a Course by its Course_Number
 exports.update = (req, res) => {
-  const id = req.params.id;
+  const courseNumber = req.params.id;
 
-  Course.update(req.body, {
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Course was updated successfully."
-        });
-      } else {
-        res.send({
-          message: `Cannot update Course with id=${id}. Maybe Course was not found or req.body is empty!`
-        });
-      }
+  Course.update(req.body, { where: { Course_Number: courseNumber } })
+    .then(([count]) => {
+      if (count === 1) return res.send({ message: 'Course updated successfully.' });
+      return res.status(404).send({ message: `Course with Course_Number=${courseNumber} not found or no changes.` });
     })
     .catch(err => {
-      res.status(500).send({
-        message: "Error updating Course with id=" + id
-      });
+      res.status(500).send({ message: 'Error updating Course with Course_Number=' + courseNumber, detail: err.message });
     });
 };
 
-// Delete a Course with the specified id in the request
+// Delete a Course with the specified Course_Number in the request
 exports.delete = (req, res) => {
-  const id = req.params.id;
+  const courseNumber = req.params.id;
 
-  Course.destroy({
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Course was deleted successfully!"
-        });
-      } else {
-        res.send({
-          message: `Cannot delete Course with id=${id}. Maybe Course was not found!`
-        });
-      }
+  Course.destroy({ where: { Course_Number: courseNumber } })
+    .then(count => {
+      if (count === 1) return res.send({ message: 'Course deleted successfully.' });
+      return res.status(404).send({ message: `Cannot delete. Course with Course_Number=${courseNumber} not found.` });
     })
     .catch(err => {
-      res.status(500).send({
-        message: "Could not delete Course with id=" + id
-      });
+      res.status(500).send({ message: 'Could not delete Course with Course_Number=' + courseNumber, detail: err.message });
     });
 };
 
