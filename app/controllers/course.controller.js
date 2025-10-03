@@ -94,6 +94,6 @@ module.exports = {
   findAll,
   findOne,
   update,
-  delete: remove,   // export with the key 'delete'
+  delete: remove,   // export with  'delete'
   deleteAll,
 };
