@@ -28,5 +28,5 @@ app.get('/', (_req, res) => res.json({ message: 'Welcome to Courses application.
 require('./app/routes/courses')(app);
 
 // Start
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3011;
 app.listen(PORT, () => console.log(`API running at http://localhost:${PORT}`));
