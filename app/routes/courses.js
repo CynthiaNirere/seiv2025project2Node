@@ -12,5 +12,5 @@ module.exports = (app) => {
   router.delete('/:courseNumber', controller.delete);
   router.delete('/', controller.deleteAll);
 
-  app.use('/api/courses', router);
+  app.use('/course-t1/courses', router);
 };
