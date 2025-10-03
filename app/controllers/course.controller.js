@@ -1,135 +1,99 @@
-const db = require("../models");
+// app/controllers/course.controller.js
+const db = require('../models');
 const Course = db.courses;
-const Op = db.Sequelize.Op;
 
-// Create and Save a new Course
-exports.create = (req, res) => {
-  // Validate request
-  if (!req.body.Dept || !req.body.Course_Number || !req.body.Name) {
-    res.status(400).send({
-      message: "Dept, Course_Number, and Name are required!"
-    });
-    return;
+// Create
+async function create(req, res) {
+  try {
+    const required = ['Dept', 'Course_Number', 'Name'];
+    for (const f of required) {
+      if (!req.body[f]) return res.status(400).json({ message: `${f} is required` });
+    }
+
+    // normalize (optional)
+    req.body.Dept = (req.body.Dept || '').trim().toUpperCase();
+    req.body.Course_Number = (req.body.Course_Number || '').trim().toUpperCase();
+
+    const created = await Course.create(req.body);
+    return res.status(201).json(created);
+  } catch (err) {
+    console.error(err);
+    // duplicate PK / unique
+    if (err.name === 'SequelizeUniqueConstraintError' || err.original?.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: 'Course number already exists' });
+    }
+    res.status(500).json({ message: 'Failed to create course' });
   }
+}
 
-  // Create a Course
-  const course = {
-    Dept: req.body.Dept,
-    Course_Number: req.body.Course_Number,
-    Level: req.body.Level,
-    Hours: req.body.Hours,
-    Name: req.body.Name,
-    Description: req.body.Description
-  };
+// Find all
+async function findAll(_req, res) {
+  try {
+    const items = await Course.findAll({ order: [['Course_Number', 'ASC']] });
+    res.json(items);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch courses' });
+  }
+}
 
-  // Save Course in the database
-  Course.create(course)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while creating the Course."
-      });
-    });
-};
+// Find one
+async function findOne(req, res) {
+  try {
+    const item = await Course.findOne({ where: { Course_Number: req.params.courseNumber } });
+    if (!item) return res.status(404).json({ message: 'Course not found' });
+    res.json(item);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch course' });
+  }
+}
 
-// Retrieve all Courses from the database
-exports.findAll = (req, res) => {
-  Course.findAll()
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving courses."
-      });
-    });
-};
+// Update
+async function update(req, res) {
+  try {
+    // prevent PK change
+    if (req.body.Course_Number && req.body.Course_Number !== req.params.courseNumber) {
+      return res.status(400).json({ message: 'Course_Number cannot be changed' });
+    }
+    const [count] = await Course.update(req.body, { where: { Course_Number: req.params.courseNumber } });
+    if (!count) return res.status(404).json({ message: 'Course not found' });
+    const updated = await Course.findOne({ where: { Course_Number: req.params.courseNumber } });
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to update course' });
+  }
+}
 
-// Find a single Course with an id
-exports.findOne = (req, res) => {
-  const id = req.params.id;
+// Delete by Course_Number
+async function remove(req, res) {
+  try {
+    const count = await Course.destroy({ where: { Course_Number: req.params.courseNumber } });
+    if (!count) return res.status(404).json({ message: 'Course not found' });
+    res.json({ message: 'Course deleted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to delete course' });
+  }
+}
 
-  Course.findByPk(id)
-    .then(data => {
-      if (data) {
-        res.send(data);
-      } else {
-        res.status(404).send({
-          message: `Cannot find Course with id=${id}.`
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error retrieving Course with id=" + id
-      });
-    });
-};
+// Delete all
+async function deleteAll(_req, res) {
+  try {
+    const count = await Course.destroy({ where: {} });
+    res.json({ message: `Deleted ${count} courses` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to delete all courses' });
+  }
+}
 
-// Update a Course by the id in the request
-exports.update = (req, res) => {
-  const id = req.params.id;
-
-  Course.update(req.body, {
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Course was updated successfully."
-        });
-      } else {
-        res.send({
-          message: `Cannot update Course with id=${id}. Maybe Course was not found or req.body is empty!`
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error updating Course with id=" + id
-      });
-    });
-};
-
-// Delete a Course with the specified id in the request
-exports.delete = (req, res) => {
-  const id = req.params.id;
-
-  Course.destroy({
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Course was deleted successfully!"
-        });
-      } else {
-        res.send({
-          message: `Cannot delete Course with id=${id}. Maybe Course was not found!`
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Could not delete Course with id=" + id
-      });
-    });
-};
-
-// Delete all Courses from the database
-exports.deleteAll = (req, res) => {
-  Course.destroy({
-    where: {},
-    truncate: false
-  })
-    .then(nums => {
-      res.send({ message: `${nums} Courses were deleted successfully!` });
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while removing all courses."
-      });
-    });
+module.exports = {
+  create,
+  findAll,
+  findOne,
+  update,
+  delete: remove,   // export with  'delete'
+  deleteAll,
 };
