@@ -1,10 +1,10 @@
 module.exports = (sequelize, Sequelize) => {
-  const Course = sequelize.define("course", {
+  const Course = sequelize.define("Course", {
     Course_Number: {
       type: Sequelize.STRING(45),
       primaryKey: true,
       allowNull: false,
-      field: 'Course Number'
+      field: 'Course_Number'
     },
     Dept: {
       type: Sequelize.STRING(25),
